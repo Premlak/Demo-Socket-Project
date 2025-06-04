@@ -10,10 +10,8 @@ let counter = 10;
 let isLocked = false;
 const connectedClients = new Map();
 app.use(cors());
-const clientBuildPath = path.join(__dirname, './build');
-app.use(express.static(clientBuildPath));
-app.get('/', (_, res) => {
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
+app.use((req, res, nxt)=>{
+res.sendFile(path.join(__dirname,'./build','index.html'))
 });
 io.on('connection', (socket) => {
   connectedClients.set(socket.id, true);
