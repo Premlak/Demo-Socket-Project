@@ -11,33 +11,28 @@ let isLocked = false;
 const connectedClients = new Map();
 app.use(cors());
 app.use(express.static('build'));
-app.use(cors({
-    origin: process.env.FRONTEND_URL || "*", 
-    methods: ["GET", "POST"],
-}));
-app.use((req, res, nxt)=>{
-res.sendFile(path.join(__dirname,'./build','index.html'))
-})
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, './build', 'index.html'));
+});
+
 io.on('connection', (socket) => {
   connectedClients.set(socket.id, true);
   socket.emit('connected', { id: socket.id, counter, allUsers: Array.from(connectedClients.keys()) });
   io.emit('users', Array.from(connectedClients.keys()));
-  socket.on('increment', (cb) => {
-    if (isLocked) return cb({ success: false, msg: "Someone else is clicking!" });
+  const handleCounterChange = (type, cb) => {
+    if (isLocked) {
+      return cb({ success: false, msg: "Please wait, another user is updating!" });
+    }
     isLocked = true;
-    counter++;
+    type === 'increment' ? counter++ : counter--;
     io.emit('updateCounter', counter);
     cb({ success: true, counter });
-    isLocked = false;
-  });
-  socket.on('decrement', (cb) => {
-    if (isLocked) return cb({ success: false, msg: "Someone else is clicking!" });
-    isLocked = true;
-    counter--;
-    io.emit('updateCounter', counter);
-    cb({ success: true, counter });
-    isLocked = false;
-  });
+    setTimeout(() => {
+      isLocked = false;
+    }, 100); 
+  };
+  socket.on('increment', (cb) => handleCounterChange('increment', cb));
+  socket.on('decrement', (cb) => handleCounterChange('decrement', cb));
   socket.on('disconnect', () => {
     connectedClients.delete(socket.id);
     io.emit('users', Array.from(connectedClients.keys()));

@@ -4,6 +4,7 @@ function Decrement() {
   const { socket, counter } = useContext(SocketContext);
   const [message, setMessage] = useState("");
   const handleClick = () => {
+    setMessage("Processing...");
     socket.emit("decrement", (res) => {
       setMessage(res.success ? "Decremented!" : res.msg);
     });
@@ -12,7 +13,10 @@ function Decrement() {
     <div className="p-4">
       <h1 className="text-xl font-bold">Decrement Page</h1>
       <p>Counter: {counter}</p>
-      <button onClick={handleClick} className="mt-2 px-4 py-2 bg-red-500 text-white rounded">
+      <button 
+        onClick={handleClick} 
+        className="mt-2 px-4 py-2 bg-red-500 text-white rounded"
+      >
         Decrement
       </button>
       <p>{message}</p>

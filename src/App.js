@@ -1,18 +1,14 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-
 const Home = React.lazy(() => import("./pages/Home"));
 const Increment = React.lazy(() => import("./pages/Increment"));
 const Decrement = React.lazy(() => import("./pages/Decrement"));
-
 export const SocketContext = React.createContext();
-
 function AppWrapper() {
   const [socket, setSocket] = useState(null);
   const [counter, setCounter] = useState(10);
   const [users, setUsers] = useState([]);
-
   useEffect(() => {
     const s = io();
     setSocket(s);
@@ -24,7 +20,6 @@ function AppWrapper() {
     s.on("users", setUsers);
     return () => s.disconnect();
   }, []);
-
   return (
     <SocketContext.Provider value={{ socket, counter, setCounter, users }}>
       <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
@@ -37,8 +32,6 @@ function AppWrapper() {
     </SocketContext.Provider>
   );
 }
-
-// 🔁 Add navigation buttons in each page
 const withNavigation = (Component) => () => {
   const navigate = useNavigate();
   return (
